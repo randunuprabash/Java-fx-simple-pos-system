@@ -8,15 +8,11 @@ class DBConnectionTest {
 
     @Test
     void getInstance() {
-        if (true){
-            throw new RuntimeException("Failed");
-        }
-        System.out.println("getInstance()");
-        assertTrue( false);
+        assertEquals(DBConnection.getInstance(), DBConnection.getInstance());
     }
 
     @Test
     void getConnection() {
-        System.out.println("getConnection()");
+        assertNotNull(DBConnection.getInstance().getConnection());
     }
 }

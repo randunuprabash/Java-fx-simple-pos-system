@@ -16,20 +16,18 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 
-public class ManageItemFormController {
-
+public class ManageCustomersFormController {
     public AnchorPane root;
-    public JFXTextField txtCode;
-    public JFXTextField txtDescription;
-    public JFXTextField txtQtyOnHand;
+    public JFXTextField txtCustomerName;
+    public JFXTextField txtCustomerId;
     public JFXButton btnDelete;
     public JFXButton btnSave;
-    public TableView tblItems;
-    public JFXTextField txtUnitPrice;
+    public JFXTextField txtCustomerAddress;
+    public TableView tblCustomers;
 
     @FXML
     private void navigateToHome(MouseEvent event) throws IOException {
-        URL resource = this.getClass().getResource("/view/MainForm.fxml");
+        URL resource = this.getClass().getResource("/view/main-form.fxml");
         Parent root = FXMLLoader.load(resource);
         Scene scene = new Scene(root);
         Stage primaryStage = (Stage) (this.root.getScene().getWindow());
@@ -41,9 +39,9 @@ public class ManageItemFormController {
     public void btnAddNew_OnAction(ActionEvent actionEvent) {
     }
 
-    public void btnDelete_OnAction(ActionEvent actionEvent) {
+    public void btnSave_OnAction(ActionEvent actionEvent) {
     }
 
-    public void btnSave_OnAction(ActionEvent actionEvent) {
+    public void btnDelete_OnAction(ActionEvent actionEvent) {
     }
 }

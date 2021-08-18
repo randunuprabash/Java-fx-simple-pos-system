@@ -111,16 +111,16 @@ public class MainFormController {
 
             switch(icon.getId()){
                 case "imgCustomer":
-                    root = FXMLLoader.load(this.getClass().getResource("/view/ManageCustomerForm.fxml"));
+                    root = FXMLLoader.load(this.getClass().getResource("/view/manage-customers-form.fxml"));
                     break;
                 case "imgItem":
-                    root = FXMLLoader.load(this.getClass().getResource("/view/ManageItemForm.fxml"));
+                    root = FXMLLoader.load(this.getClass().getResource("/view/manage-items-form.fxml"));
                     break;
                 case "imgOrder":
-                    root = FXMLLoader.load(this.getClass().getResource("/view/PlaceOrderForm.fxml"));
+                    root = FXMLLoader.load(this.getClass().getResource("/view/place-order-form.fxml"));
                     break;
                 case "imgViewOrders":
-                    root = FXMLLoader.load(this.getClass().getResource("/view/SearchOrdersForm.fxml"));
+                    root = FXMLLoader.load(this.getClass().getResource("/view/search-orders-form.fxml"));
                     break;
             }
 

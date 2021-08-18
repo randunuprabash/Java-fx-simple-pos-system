@@ -1,6 +1,6 @@
-/*
- * Empty Stylesheet file.
- */
+*{
+    -fx-font-family: Ubuntu;
+}
 
 .mainFxmlClass {
     -fx-background-color: red;

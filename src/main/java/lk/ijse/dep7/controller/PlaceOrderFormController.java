@@ -9,14 +9,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
+import lk.ijse.dep7.exception.FailedOperationException;
+import lk.ijse.dep7.exception.NotFoundException;
+import lk.ijse.dep7.service.CustomerService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 
 public class PlaceOrderFormController {
 
@@ -28,12 +34,47 @@ public class PlaceOrderFormController {
     public JFXButton btnSave;
     public TableView tblOrderDetails;
     public JFXTextField txtUnitPrice;
-    public JFXComboBox cmbCustomerId;
-    public JFXComboBox cmbItemCode;
+    public JFXComboBox<String> cmbCustomerId;
+    public JFXComboBox<String> cmbItemCode;
     public JFXTextField txtQty;
     public Label lblId;
     public Label lblDate;
     public Label lblTotal;
+
+    private CustomerService customerService = new CustomerService(SingleConnectionDataSource.getInstance().getConnection());
+
+    public void initialize() throws FailedOperationException {
+
+        /* Todo: We need to generate and set a new order id */
+
+        lblDate.setText(LocalDate.now().toString());
+        btnPlaceOrder.setDisable(true);
+        txtCustomerName.setEditable(false);
+
+        cmbCustomerId.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null){
+
+                try {
+                    txtCustomerName.setText(customerService.findCustomer(newValue).getName());
+                } catch (NotFoundException e) {
+                    e.printStackTrace();    // This can't be happened with our UI design
+                } catch (FailedOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        loadAllCustomers();
+    }
+
+    private void loadAllCustomers() throws FailedOperationException {
+        try {
+            customerService.findAllCustomers().forEach(dto->cmbCustomerId.getItems().add(dto.getId()));
+        } catch (FailedOperationException e) {
+            new Alert(Alert.AlertType.ERROR, "Failed to load customer ids").show();
+            throw e;
+        }
+    }
 
     @FXML
     private void navigateToHome(MouseEvent event) throws IOException {

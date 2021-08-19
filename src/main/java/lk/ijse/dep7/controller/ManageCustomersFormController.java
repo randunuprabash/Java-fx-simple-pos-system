@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,10 +17,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
+import lk.ijse.dep7.dto.CustomerDTO;
+import lk.ijse.dep7.exception.FailedOperationException;
+import lk.ijse.dep7.service.CustomerService;
 import lk.ijse.dep7.util.CustomerTM;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ManageCustomersFormController {
     public AnchorPane root;
@@ -30,8 +37,9 @@ public class ManageCustomersFormController {
     public JFXTextField txtCustomerAddress;
     public TableView<CustomerTM> tblCustomers;
     public JFXButton btnAddNewCustomer;
+    private CustomerService customerService = new CustomerService(SingleConnectionDataSource.getInstance().getConnection());
 
-    public void initialize() {
+    public void initialize() throws FailedOperationException {
         tblCustomers.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("id"));
         tblCustomers.getColumns().get(1).setCellValueFactory(new PropertyValueFactory<>("name"));
         tblCustomers.getColumns().get(2).setCellValueFactory(new PropertyValueFactory<>("address"));
@@ -55,6 +63,19 @@ public class ManageCustomersFormController {
         });
 
         txtCustomerAddress.setOnAction(event -> btnSave.fire());
+        loadAllCustomers();
+    }
+
+    private void loadAllCustomers() throws FailedOperationException {
+
+        tblCustomers.getItems().clear();
+        try {
+            customerService.findAllCustomers().forEach(dto-> tblCustomers.getItems().add(new CustomerTM(dto.getId(), dto.getName(), dto.getAddress())));
+        } catch (FailedOperationException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+            throw e;
+        }
+
     }
 
     private void initUI(){

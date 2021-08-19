@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -171,7 +172,17 @@ public class PlaceOrderFormController {
         int qty = Integer.parseInt(txtQty.getText());
         BigDecimal total = unitPrice.multiply(new BigDecimal(qty)).setScale(2);
 
-        tblOrderDetails.getItems().add(new OrderDetailTM(itemCode, description,qty, unitPrice, total));
+        boolean exists = tblOrderDetails.getItems().stream().anyMatch(detail -> detail.getCode().equals(itemCode));
+
+        if (exists){
+            OrderDetailTM orderDetailTM = tblOrderDetails.getItems().stream().filter(detail -> detail.getCode().equals(itemCode)).findFirst().get();
+            orderDetailTM.setQty(orderDetailTM.getQty() + qty);
+            total = new BigDecimal(orderDetailTM.getQty()).multiply(unitPrice).setScale(2);
+            orderDetailTM.setTotal(total);
+            tblOrderDetails.refresh();
+        }else{
+            tblOrderDetails.getItems().add(new OrderDetailTM(itemCode, description,qty, unitPrice, total));
+        }
         cmbItemCode.getSelectionModel().clearSelection();
         cmbItemCode.requestFocus();
     }

@@ -40,8 +40,10 @@ public class ManageCustomersFormController {
 
         tblCustomers.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             btnDelete.setDisable(newValue == null);
+            btnSave.setText(newValue != null? "Update": "Save");
+            btnSave.setDisable(newValue == null);
 
-            if (newValue != null){
+            if (newValue != null) {
                 txtCustomerId.setText(newValue.getId());
                 txtCustomerName.setText(newValue.getName());
                 txtCustomerAddress.setText(newValue.getAddress());
@@ -51,6 +53,8 @@ public class ManageCustomersFormController {
                 txtCustomerAddress.setDisable(false);
             }
         });
+
+        txtCustomerAddress.setOnAction(event -> btnSave.fire());
     }
 
     private void initUI(){
@@ -86,6 +90,7 @@ public class ManageCustomersFormController {
         txtCustomerAddress.clear();
         txtCustomerName.requestFocus();
         btnSave.setDisable(false);
+        btnSave.setText("Save");
         tblCustomers.getSelectionModel().clearSelection();
     }
 

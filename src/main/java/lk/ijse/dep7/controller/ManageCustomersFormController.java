@@ -27,6 +27,8 @@ import lk.ijse.dep7.util.CustomerTM;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -184,10 +186,16 @@ public class ManageCustomersFormController {
         if (tblCustomers.getItems().isEmpty()){
             return "C001";
         }else{
-            String id = tblCustomers.getItems().get(tblCustomers.getItems().size() - 1).getId();
+            String id = getLastCustomerId();
             int newCustomerId = Integer.parseInt(id.replace("C", "")) + 1;
             return String.format("C%03d", newCustomerId);
         }
+    }
+
+    private String getLastCustomerId(){
+        List<CustomerTM> tempCustomersList = new ArrayList<>(tblCustomers.getItems());
+        Collections.sort(tempCustomersList);
+        return tempCustomersList.get(tempCustomersList.size() - 1).getId();
     }
 
 }

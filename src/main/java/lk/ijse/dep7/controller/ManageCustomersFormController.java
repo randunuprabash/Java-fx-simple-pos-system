@@ -109,8 +109,18 @@ public class ManageCustomersFormController {
             return;
         }
 
-        /* Todo: We need to save this in our DB First */
-        tblCustomers.getItems().add(new CustomerTM(id, name, address));
+        if (btnSave.getText().equalsIgnoreCase("save")){
+
+            /* Todo: We need to save this in our DB First */
+            tblCustomers.getItems().add(new CustomerTM(id, name, address));
+        }else{
+            /* Todo: First of all we need to update the DB, if that success */
+            CustomerTM selectedCustomer = tblCustomers.getSelectionModel().getSelectedItem();
+            selectedCustomer.setName(name);
+            selectedCustomer.setAddress(address);
+            tblCustomers.refresh();
+        }
+
         btnAddNewCustomer.fire();
     }
 

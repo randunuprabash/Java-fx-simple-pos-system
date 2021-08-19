@@ -1,6 +1,9 @@
 package lk.ijse.dep7.service;
 
 import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
+import lk.ijse.dep7.dto.CustomerDTO;
+import lk.ijse.dep7.exception.DuplicateIdentifierException;
+import lk.ijse.dep7.exception.FailedOperationException;
 import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
@@ -14,7 +17,7 @@ class CustomerServiceTest {
 
     @BeforeEach
     private void initBeforeEachTest() throws SQLException {
-        SingleConnectionDataSource.init("jdbc:mysql://localhost:3306/dep7_backup_pos","root","mysql");
+        SingleConnectionDataSource.init("jdbc:mysql://localhost:3306/dep7_backup_pos", "root", "mysql");
         Connection connection = SingleConnectionDataSource.getInstance().getConnection();
         this.customerService = new CustomerService(connection);
         connection.setAutoCommit(false);
@@ -29,8 +32,11 @@ class CustomerServiceTest {
     }
 
     @Test
-    void saveCustomer() {
-        System.out.println("Save Customer Test");
+    void saveCustomer() throws FailedOperationException, DuplicateIdentifierException, SQLException {
+        customerService.saveCustomer(new CustomerDTO("C002", "Sovis", "Moratuwa"));
+        assertTrue(customerService.existCustomer("C002"));
+        assertThrows(DuplicateIdentifierException.class, () ->
+                customerService.saveCustomer(new CustomerDTO("C001", "Viduranga", "Galle")));
     }
 
     @Test

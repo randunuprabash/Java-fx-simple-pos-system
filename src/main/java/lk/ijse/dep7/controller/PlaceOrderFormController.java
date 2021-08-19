@@ -16,9 +16,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
+import lk.ijse.dep7.dto.ItemDTO;
 import lk.ijse.dep7.exception.FailedOperationException;
 import lk.ijse.dep7.exception.NotFoundException;
 import lk.ijse.dep7.service.CustomerService;
+import lk.ijse.dep7.service.ItemService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,7 +43,8 @@ public class PlaceOrderFormController {
     public Label lblDate;
     public Label lblTotal;
 
-    private CustomerService customerService = new CustomerService(SingleConnectionDataSource.getInstance().getConnection());
+    private final CustomerService customerService = new CustomerService(SingleConnectionDataSource.getInstance().getConnection());
+    private final ItemService itemService = new ItemService(SingleConnectionDataSource.getInstance().getConnection());
 
     public void initialize() throws FailedOperationException {
 
@@ -59,19 +62,49 @@ public class PlaceOrderFormController {
                 } catch (NotFoundException e) {
                     e.printStackTrace();    // This can't be happened with our UI design
                 } catch (FailedOperationException e) {
+                    new Alert(Alert.AlertType.ERROR, "Failed to load customer information").show();
                     throw new RuntimeException(e);
                 }
             }
         });
 
-        loadAllCustomers();
+        cmbItemCode.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newItemCode) -> {
+            if (newItemCode != null){
+
+                try {
+                    ItemDTO item = itemService.findItem(newItemCode);
+
+                    txtDescription.setText(item.getDescription());
+                    txtUnitPrice.setText(item.getUnitPrice().setScale(2).toString());
+                    txtQtyOnHand.setText(item.getQtyOnHand() + "");
+
+                } catch (NotFoundException e) {
+                    e.printStackTrace();    // This can't be happened with our UI design
+                } catch (FailedOperationException e) {
+                    new Alert(Alert.AlertType.ERROR, "Failed to load item details").show();
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        loadAllCustomerIds();
+        loadAllItemCodes();
     }
 
-    private void loadAllCustomers() throws FailedOperationException {
+    private void loadAllCustomerIds() throws FailedOperationException {
         try {
             customerService.findAllCustomers().forEach(dto->cmbCustomerId.getItems().add(dto.getId()));
         } catch (FailedOperationException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to load customer ids").show();
+            throw e;
+        }
+    }
+
+    private void loadAllItemCodes() throws FailedOperationException {
+        try {
+            itemService.findAllItems().forEach(dto-> cmbItemCode.getItems().add(dto.getCode()));
+        } catch (FailedOperationException e) {
+            new Alert(Alert.AlertType.ERROR, "Failed to load item codes").show();
             throw e;
         }
     }

@@ -59,6 +59,9 @@ public class PlaceOrderFormController {
         TableColumn<OrderDetailTM, Button> lastCol = (TableColumn<OrderDetailTM, Button>) tblOrderDetails.getColumns().get(5);
         lastCol.setCellValueFactory(param -> {
             Button btnDelete = new Button("Delete");
+            btnDelete.setOnAction(event -> {
+               tblOrderDetails.getItems().remove(param.getValue());
+            });
 
             return new ReadOnlyObjectWrapper<>(btnDelete);
         });
@@ -67,9 +70,13 @@ public class PlaceOrderFormController {
 
         lblDate.setText(LocalDate.now().toString());
         btnPlaceOrder.setDisable(true);
+        txtCustomerName.setFocusTraversable(false);
         txtCustomerName.setEditable(false);
+        txtDescription.setFocusTraversable(false);
         txtDescription.setEditable(false);
+        txtUnitPrice.setFocusTraversable(false);
         txtUnitPrice.setEditable(false);
+        txtQtyOnHand.setFocusTraversable(false);
         txtQtyOnHand.setEditable(false);
         txtQty.setOnAction(event -> btnSave.fire());
         txtQty.setEditable(false);
@@ -108,6 +115,11 @@ public class PlaceOrderFormController {
                     new Alert(Alert.AlertType.ERROR, "Failed to load item details").show();
                     throw new RuntimeException(e);
                 }
+            }else{
+                txtDescription.clear();
+                txtQty.clear();
+                txtQtyOnHand.clear();
+                txtUnitPrice.clear();
             }
         });
 
@@ -160,6 +172,8 @@ public class PlaceOrderFormController {
         BigDecimal total = unitPrice.multiply(new BigDecimal(qty)).setScale(2);
 
         tblOrderDetails.getItems().add(new OrderDetailTM(itemCode, description,qty, unitPrice, total));
+        cmbItemCode.getSelectionModel().clearSelection();
+        cmbItemCode.requestFocus();
     }
 
     public void txtQty_OnAction(ActionEvent actionEvent) {

@@ -60,8 +60,18 @@ public class CustomerService {
         }
     }
 
-    public void deleteCustomer(String id) {
+    public void deleteCustomer(String id) throws NotFoundException, FailedOperationException {
+        try {
+            if (!existCustomer(id)){
+                throw new NotFoundException("There is no such customer associated with the id " + id);
+            }
 
+            PreparedStatement pstm = connection.prepareStatement("DELETE FROM customer WHERE id=?");
+            pstm.setString(1,id);
+            pstm.executeUpdate();
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to delete the customer " + id, e);
+        }
     }
 
     public CustomerDTO findCustomer(String id) {

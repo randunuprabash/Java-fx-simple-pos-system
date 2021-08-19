@@ -5,7 +5,9 @@ import lk.ijse.dep7.dto.CustomerDTO;
 import lk.ijse.dep7.exception.DuplicateIdentifierException;
 import lk.ijse.dep7.exception.FailedOperationException;
 import lk.ijse.dep7.exception.NotFoundException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -48,8 +50,16 @@ class CustomerServiceTest {
         rst.next();
         assertEquals(rst.getString("name"), "Sachintha");
         assertEquals(rst.getString("address"), "Matara");
-        assertThrows(NotFoundException.class, ()->
-        customerService.updateCustomer(new CustomerDTO("C100","Gayal", "Nuwara")));
+        assertThrows(NotFoundException.class, () ->
+                customerService.updateCustomer(new CustomerDTO("C100", "Gayal", "Nuwara")));
+    }
+
+    @Test
+    void deleteCustomer() throws FailedOperationException, NotFoundException, SQLException {
+        customerService.deleteCustomer("C001");
+        assertFalse(SingleConnectionDataSource.getInstance().getConnection().prepareStatement("SELECT * FROM customer WHERE id='C001'").executeQuery().next());
+        assertThrows(NotFoundException.class, () ->
+                customerService.deleteCustomer("C100"));
     }
 
 //    @Test

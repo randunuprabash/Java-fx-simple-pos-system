@@ -1,14 +1,13 @@
 package lk.ijse.dep7.service;
 
-import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
 import lk.ijse.dep7.dto.CustomerDTO;
 import lk.ijse.dep7.exception.DuplicateIdentifierException;
 import lk.ijse.dep7.exception.FailedOperationException;
+import lk.ijse.dep7.exception.NotFoundException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 public class CustomerService {
@@ -24,7 +23,7 @@ public class CustomerService {
 
     public void saveCustomer(CustomerDTO customer) throws DuplicateIdentifierException, FailedOperationException {
         try {
-            if (existCustomer(customer.getId())){
+            if (existCustomer(customer.getId())) {
                 throw new DuplicateIdentifierException(customer.getId() + " already exists");
             }
 
@@ -38,14 +37,27 @@ public class CustomerService {
         }
     }
 
-    public boolean existCustomer(String id) throws SQLException {
+    private boolean existCustomer(String id) throws SQLException {
         PreparedStatement pstm = connection.prepareStatement("SELECT id FROM customer WHERE id=?");
         pstm.setString(1, id);
         return pstm.executeQuery().next();
     }
 
-    public void updateCustomer(CustomerDTO customer) {
+    public void updateCustomer(CustomerDTO customer) throws FailedOperationException, NotFoundException {
+        try {
 
+            if (!existCustomer(customer.getId())){
+                throw new NotFoundException("There is no such customer associated with the id " + customer.getId());
+            }
+
+            PreparedStatement pstm = connection.prepareStatement("UPDATE customer SET name=?, address=? WHERE id=?");
+            pstm.setString(1,customer.getName());
+            pstm.setString(2,customer.getAddress());
+            pstm.setString(3,customer.getId());
+            pstm.executeUpdate();
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to update the customer " + customer.getId(), e);
+        }
     }
 
     public void deleteCustomer(String id) {

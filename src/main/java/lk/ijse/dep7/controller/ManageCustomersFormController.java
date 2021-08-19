@@ -3,9 +3,6 @@ package lk.ijse.dep7.controller;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,7 +27,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ManageCustomersFormController {
     public AnchorPane root;
@@ -41,7 +37,7 @@ public class ManageCustomersFormController {
     public JFXTextField txtCustomerAddress;
     public TableView<CustomerTM> tblCustomers;
     public JFXButton btnAddNewCustomer;
-    private CustomerService customerService = new CustomerService(SingleConnectionDataSource.getInstance().getConnection());
+    private final CustomerService customerService = new CustomerService(SingleConnectionDataSource.getInstance().getConnection());
 
     public void initialize() throws FailedOperationException {
         tblCustomers.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -52,7 +48,7 @@ public class ManageCustomersFormController {
 
         tblCustomers.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             btnDelete.setDisable(newValue == null);
-            btnSave.setText(newValue != null? "Update": "Save");
+            btnSave.setText(newValue != null ? "Update" : "Save");
             btnSave.setDisable(newValue == null);
 
             if (newValue != null) {
@@ -74,7 +70,7 @@ public class ManageCustomersFormController {
 
         tblCustomers.getItems().clear();
         try {
-            customerService.findAllCustomers().forEach(dto-> tblCustomers.getItems().add(new CustomerTM(dto.getId(), dto.getName(), dto.getAddress())));
+            customerService.findAllCustomers().forEach(dto -> tblCustomers.getItems().add(new CustomerTM(dto.getId(), dto.getName(), dto.getAddress())));
         } catch (FailedOperationException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
             throw e;
@@ -82,7 +78,7 @@ public class ManageCustomersFormController {
 
     }
 
-    private void initUI(){
+    private void initUI() {
         txtCustomerId.clear();
         txtCustomerName.clear();
         txtCustomerAddress.clear();
@@ -124,11 +120,11 @@ public class ManageCustomersFormController {
         String name = txtCustomerName.getText();
         String address = txtCustomerAddress.getText();
 
-        if (!name.matches("[A-Za-z ]+")){
+        if (!name.matches("[A-Za-z ]+")) {
             new Alert(Alert.AlertType.ERROR, "Invalid name").show();
             txtCustomerName.requestFocus();
             return;
-        }else if (!address.matches(".{3,}")){
+        } else if (!address.matches(".{3,}")) {
             new Alert(Alert.AlertType.ERROR, "Address should be at least 3 characters long").show();
             txtCustomerAddress.requestFocus();
             return;
@@ -159,7 +155,7 @@ public class ManageCustomersFormController {
                 }
             }
 
-        }catch (FailedOperationException  e){
+        } catch (FailedOperationException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
             throw e;
         }
@@ -198,7 +194,7 @@ public class ManageCustomersFormController {
 //        }
     }
 
-    private String getLastCustomerId(){
+    private String getLastCustomerId() {
         List<CustomerTM> tempCustomersList = new ArrayList<>(tblCustomers.getItems());
         Collections.sort(tempCustomersList);
         return tempCustomersList.get(tempCustomersList.size() - 1).getId();

@@ -38,11 +38,11 @@
             <Font name="Lucida Sans Demibold" size="27.0" />
          </font>
       </Label>
-      <JFXButton id="btnAddNewCustomer" layoutX="518.0" layoutY="25.0" onAction="#btnAddNew_OnAction" prefHeight="35.0" prefWidth="122.0" style="-fx-cursor: hand;" text="+ New Item" />
+      <JFXButton id="btnAddNewCustomer" fx:id="btnAddNewItem" layoutX="518.0" layoutY="25.0" onAction="#btnAddNew_OnAction" prefHeight="35.0" prefWidth="122.0" style="-fx-cursor: hand;" text="+ New Item" />
       <JFXTextField fx:id="txtCode" labelFloat="true" layoutX="17.0" layoutY="118.0" prefHeight="28.0" prefWidth="615.0" promptText="Item Code :" />
       <JFXTextField fx:id="txtDescription" labelFloat="true" layoutX="17.0" layoutY="164.0" prefHeight="28.0" prefWidth="615.0" promptText="Item Description :" />
-      <JFXTextField fx:id="txtQtyOnHand" labelFloat="true" layoutX="17.0" layoutY="212.0" prefHeight="28.0" prefWidth="615.0" promptText="Qty. on Hand" />
-      <JFXTextField fx:id="txtUnitPrice" labelFloat="true" layoutX="17.0" layoutY="258.0" prefHeight="28.0" prefWidth="615.0" promptText="Unit Price" />
+      <JFXTextField fx:id="txtUnitPrice" labelFloat="true" layoutX="16.0" layoutY="214.0" prefHeight="28.0" prefWidth="615.0" promptText="Unit Price" />
+      <JFXTextField fx:id="txtQtyOnHand" labelFloat="true" layoutX="17.0" layoutY="267.0" prefHeight="28.0" prefWidth="615.0" promptText="Qty. on Hand" />
       <JFXButton id="btnSave" fx:id="btnSave" layoutX="249.0" layoutY="318.0" onAction="#btnSave_OnAction" prefHeight="28.0" prefWidth="74.0" style="-fx-cursor: hand;" text="Save" />
       <JFXButton id="btnDelete" fx:id="btnDelete" layoutX="333.0" layoutY="318.0" onAction="#btnDelete_OnAction" prefHeight="28.0" prefWidth="74.0" style="-fx-cursor: hand;" text="Delete" />
       <TableView fx:id="tblItems" layoutX="22.0" layoutY="363.0" prefHeight="285.0" prefWidth="615.0">

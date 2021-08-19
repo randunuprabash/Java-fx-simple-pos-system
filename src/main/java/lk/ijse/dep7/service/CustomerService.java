@@ -5,9 +5,8 @@ import lk.ijse.dep7.exception.DuplicateIdentifierException;
 import lk.ijse.dep7.exception.FailedOperationException;
 import lk.ijse.dep7.exception.NotFoundException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerService {
@@ -74,12 +73,37 @@ public class CustomerService {
         }
     }
 
-    public CustomerDTO findCustomer(String id) {
-        return null;
+    public CustomerDTO findCustomer(String id) throws NotFoundException, FailedOperationException {
+        try {
+            if (!existCustomer(id)){
+                throw new NotFoundException("There is no such customer associated with the id " + id);
+            }
+
+            PreparedStatement pstm = connection.prepareStatement("SELECT * FROM customer WHERE id=?");
+            pstm.setString(1, id);
+            ResultSet rst = pstm.executeQuery();
+            rst.next();
+            return new CustomerDTO(id, rst.getString("name"), rst.getString("address"));
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to find the customer " + id, e);
+        }
     }
 
-    public List<CustomerDTO> findAllCustomers() {
-        return null;
+    public List<CustomerDTO> findAllCustomers() throws FailedOperationException {
+        try {
+            List<CustomerDTO> customersList = new ArrayList<>();
+
+            Statement stm = connection.createStatement();
+            ResultSet rst = stm.executeQuery("SELECT * FROM customer");
+
+            while (rst.next()){
+                customersList.add(new CustomerDTO(rst.getString("id"), rst.getString("name"), rst.getString("address")));
+            }
+
+            return customersList;
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to find customers", e);
+        }
     }
 
 }

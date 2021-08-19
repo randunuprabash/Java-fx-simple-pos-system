@@ -62,6 +62,22 @@ class CustomerServiceTest {
                 customerService.deleteCustomer("C100"));
     }
 
+    @Test
+    void findCustomer() throws FailedOperationException, NotFoundException {
+        CustomerDTO c001 = customerService.findCustomer("C001");
+        assertNotNull(c001);
+        assertEquals(c001.getName(), "Dinusha");
+        assertEquals(c001.getAddress(), "Galle");
+        assertThrows(NotFoundException.class, () ->
+                customerService.findCustomer("C100"));
+    }
+
+    @Test
+    void findAllCustomers() throws FailedOperationException, DuplicateIdentifierException, SQLException {
+        saveCustomer();
+        assertEquals(customerService.findAllCustomers().size(), 2);
+    }
+
 //    @Test
 //    void existCustomer() throws SQLException {
 //        assertTrue(customerService.existCustomer("C001"));

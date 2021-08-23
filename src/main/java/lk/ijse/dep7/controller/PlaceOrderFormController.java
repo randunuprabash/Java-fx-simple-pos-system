@@ -5,8 +5,6 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,7 +15,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
 import lk.ijse.dep7.dto.ItemDTO;
 import lk.ijse.dep7.exception.FailedOperationException;
@@ -64,9 +61,10 @@ public class PlaceOrderFormController {
             Button btnDelete = new Button("Delete");
 
             btnDelete.setOnAction(event -> {
-               tblOrderDetails.getItems().remove(param.getValue());
-               tblOrderDetails.getSelectionModel().clearSelection();
+                tblOrderDetails.getItems().remove(param.getValue());
+                tblOrderDetails.getSelectionModel().clearSelection();
                 calculateTotal();
+                enableOrDisablePlaceOrderButton();
             });
 
             return new ReadOnlyObjectWrapper<>(btnDelete);
@@ -89,6 +87,8 @@ public class PlaceOrderFormController {
         btnSave.setDisable(true);
 
         cmbCustomerId.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            enableOrDisablePlaceOrderButton();
+
             if (newValue != null) {
 
                 try {
@@ -116,7 +116,7 @@ public class PlaceOrderFormController {
 
 //                    txtQtyOnHand.setText(tblOrderDetails.getItems().stream().filter(detail-> detail.getCode().equals(item.getCode())).<Integer>map(detail-> item.getQtyOnHand() - detail.getQty()).findFirst().orElse(item.getQtyOnHand()) + "");
                     Optional<OrderDetailTM> optOrderDetail = tblOrderDetails.getItems().stream().filter(detail -> detail.getCode().equals(newItemCode)).findFirst();
-                    txtQtyOnHand.setText((optOrderDetail.isPresent()? item.getQtyOnHand() - optOrderDetail.get().getQty(): item.getQtyOnHand()) + "");
+                    txtQtyOnHand.setText((optOrderDetail.isPresent() ? item.getQtyOnHand() - optOrderDetail.get().getQty() : item.getQtyOnHand()) + "");
 
                 } catch (NotFoundException e) {
                     e.printStackTrace();    // This can't be happened with our UI design
@@ -124,7 +124,7 @@ public class PlaceOrderFormController {
                     new Alert(Alert.AlertType.ERROR, "Failed to load item details").show();
                     throw new RuntimeException(e);
                 }
-            }else{
+            } else {
                 txtDescription.clear();
                 txtQty.clear();
                 txtQtyOnHand.clear();
@@ -134,13 +134,13 @@ public class PlaceOrderFormController {
 
         tblOrderDetails.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, selectedOrderDetail) -> {
 
-            if (selectedOrderDetail != null){
+            if (selectedOrderDetail != null) {
                 cmbItemCode.setDisable(true);
                 cmbItemCode.setValue(selectedOrderDetail.getCode());
                 btnSave.setText("Update");
                 txtQtyOnHand.setText(Integer.parseInt(txtQtyOnHand.getText()) + selectedOrderDetail.getQty() + "");
                 txtQty.setText(selectedOrderDetail.getQty() + "");
-            }else{
+            } else {
                 btnSave.setText("Add");
                 cmbItemCode.setDisable(false);
                 cmbItemCode.getSelectionModel().clearSelection();
@@ -199,28 +199,29 @@ public class PlaceOrderFormController {
 
         boolean exists = tblOrderDetails.getItems().stream().anyMatch(detail -> detail.getCode().equals(itemCode));
 
-        if (exists){
+        if (exists) {
             OrderDetailTM orderDetailTM = tblOrderDetails.getItems().stream().filter(detail -> detail.getCode().equals(itemCode)).findFirst().get();
 
-            if (btnSave.getText().equalsIgnoreCase("Update")){
+            if (btnSave.getText().equalsIgnoreCase("Update")) {
                 orderDetailTM.setQty(qty);
                 orderDetailTM.setTotal(total);
                 tblOrderDetails.getSelectionModel().clearSelection();
-            }else {
+            } else {
                 orderDetailTM.setQty(orderDetailTM.getQty() + qty);
                 total = new BigDecimal(orderDetailTM.getQty()).multiply(unitPrice).setScale(2);
                 orderDetailTM.setTotal(total);
             }
             tblOrderDetails.refresh();
-        }else{
-            tblOrderDetails.getItems().add(new OrderDetailTM(itemCode, description,qty, unitPrice, total));
+        } else {
+            tblOrderDetails.getItems().add(new OrderDetailTM(itemCode, description, qty, unitPrice, total));
         }
         cmbItemCode.getSelectionModel().clearSelection();
         cmbItemCode.requestFocus();
         calculateTotal();
+        enableOrDisablePlaceOrderButton();
     }
 
-    private void calculateTotal(){
+    private void calculateTotal() {
 //        BigDecimal total = new BigDecimal(0);
 //
 //        for (OrderDetailTM detail : tblOrderDetails.getItems()) {
@@ -231,9 +232,14 @@ public class PlaceOrderFormController {
                 .reduce((accumulator, element) -> accumulator.add(element)).orElse(new BigDecimal(0)).setScale(2));
     }
 
+    private void enableOrDisablePlaceOrderButton() {
+        btnPlaceOrder.setDisable(!(cmbCustomerId.getSelectionModel().getSelectedItem() != null && !tblOrderDetails.getItems().isEmpty()));
+    }
+
     public void txtQty_OnAction(ActionEvent actionEvent) {
     }
 
     public void btnPlaceOrder_OnAction(ActionEvent actionEvent) {
+        /* Todo: Call the service API */
     }
 }

@@ -59,10 +59,13 @@ public class PlaceOrderFormController {
         tblOrderDetails.getColumns().get(3).setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
         tblOrderDetails.getColumns().get(4).setCellValueFactory(new PropertyValueFactory<>("total"));
         TableColumn<OrderDetailTM, Button> lastCol = (TableColumn<OrderDetailTM, Button>) tblOrderDetails.getColumns().get(5);
+
         lastCol.setCellValueFactory(param -> {
             Button btnDelete = new Button("Delete");
+
             btnDelete.setOnAction(event -> {
                tblOrderDetails.getItems().remove(param.getValue());
+               tblOrderDetails.getSelectionModel().clearSelection();
             });
 
             return new ReadOnlyObjectWrapper<>(btnDelete);
@@ -136,6 +139,11 @@ public class PlaceOrderFormController {
                 btnSave.setText("Update");
                 txtQtyOnHand.setText(Integer.parseInt(txtQtyOnHand.getText()) + selectedOrderDetail.getQty() + "");
                 txtQty.setText(selectedOrderDetail.getQty() + "");
+            }else{
+                btnSave.setText("Add");
+                cmbItemCode.setDisable(false);
+                cmbItemCode.getSelectionModel().clearSelection();
+                txtQty.clear();
             }
 
         });
@@ -196,9 +204,7 @@ public class PlaceOrderFormController {
             if (btnSave.getText().equalsIgnoreCase("Update")){
                 orderDetailTM.setQty(qty);
                 orderDetailTM.setTotal(total);
-                btnSave.setText("Add");
                 tblOrderDetails.getSelectionModel().clearSelection();
-                cmbItemCode.setDisable(false);
             }else {
                 orderDetailTM.setQty(orderDetailTM.getQty() + qty);
                 total = new BigDecimal(orderDetailTM.getQty()).multiply(unitPrice).setScale(2);

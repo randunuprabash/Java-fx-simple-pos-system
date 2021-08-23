@@ -110,6 +110,7 @@ public class PlaceOrderFormController {
                     txtDescription.setText(item.getDescription());
                     txtUnitPrice.setText(item.getUnitPrice().setScale(2).toString());
 
+//                    txtQtyOnHand.setText(tblOrderDetails.getItems().stream().filter(detail-> detail.getCode().equals(item.getCode())).<Integer>map(detail-> item.getQtyOnHand() - detail.getQty()).findFirst().orElse(item.getQtyOnHand()) + "");
                     Optional<OrderDetailTM> optOrderDetail = tblOrderDetails.getItems().stream().filter(detail -> detail.getCode().equals(newItemCode)).findFirst();
                     txtQtyOnHand.setText((optOrderDetail.isPresent()? item.getQtyOnHand() - optOrderDetail.get().getQty(): item.getQtyOnHand()) + "");
 
@@ -125,6 +126,18 @@ public class PlaceOrderFormController {
                 txtQtyOnHand.clear();
                 txtUnitPrice.clear();
             }
+        });
+
+        tblOrderDetails.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, selectedOrderDetail) -> {
+
+            if (selectedOrderDetail != null){
+                cmbItemCode.setDisable(true);
+                cmbItemCode.setValue(selectedOrderDetail.getCode());
+                btnSave.setText("Update");
+                txtQtyOnHand.setText(Integer.parseInt(txtQtyOnHand.getText()) + selectedOrderDetail.getQty() + "");
+                txtQty.setText(selectedOrderDetail.getQty() + "");
+            }
+
         });
 
         loadAllCustomerIds();
@@ -179,9 +192,18 @@ public class PlaceOrderFormController {
 
         if (exists){
             OrderDetailTM orderDetailTM = tblOrderDetails.getItems().stream().filter(detail -> detail.getCode().equals(itemCode)).findFirst().get();
-            orderDetailTM.setQty(orderDetailTM.getQty() + qty);
-            total = new BigDecimal(orderDetailTM.getQty()).multiply(unitPrice).setScale(2);
-            orderDetailTM.setTotal(total);
+
+            if (btnSave.getText().equalsIgnoreCase("Update")){
+                orderDetailTM.setQty(qty);
+                orderDetailTM.setTotal(total);
+                btnSave.setText("Add");
+                tblOrderDetails.getSelectionModel().clearSelection();
+                cmbItemCode.setDisable(false);
+            }else {
+                orderDetailTM.setQty(orderDetailTM.getQty() + qty);
+                total = new BigDecimal(orderDetailTM.getQty()).multiply(unitPrice).setScale(2);
+                orderDetailTM.setTotal(total);
+            }
             tblOrderDetails.refresh();
         }else{
             tblOrderDetails.getItems().add(new OrderDetailTM(itemCode, description,qty, unitPrice, total));

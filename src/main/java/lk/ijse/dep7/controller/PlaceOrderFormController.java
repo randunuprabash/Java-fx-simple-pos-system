@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class PlaceOrderFormController {
 
@@ -108,7 +109,9 @@ public class PlaceOrderFormController {
 
                     txtDescription.setText(item.getDescription());
                     txtUnitPrice.setText(item.getUnitPrice().setScale(2).toString());
-                    txtQtyOnHand.setText(item.getQtyOnHand() + "");
+
+                    Optional<OrderDetailTM> optOrderDetail = tblOrderDetails.getItems().stream().filter(detail -> detail.getCode().equals(newItemCode)).findFirst();
+                    txtQtyOnHand.setText((optOrderDetail.isPresent()? item.getQtyOnHand() - optOrderDetail.get().getQty(): item.getQtyOnHand()) + "");
 
                 } catch (NotFoundException e) {
                     e.printStackTrace();    // This can't be happened with our UI design

@@ -21,7 +21,7 @@ public class OrderService {
         this.connection = connection;
     }
 
-    public void saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) throws FailedOperationException {
+    public void saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) throws FailedOperationException, DuplicateIdentifierException,  NotFoundException {
 
         CustomerService customerService = new CustomerService(connection);
         ItemService itemService = new ItemService(connection);
@@ -74,7 +74,16 @@ public class OrderService {
                 throw new FailedOperationException("Failed to rollback the transaction", e);
             }
 
-            throw new FailedOperationException("Failed to save the order", t);
+            if (t instanceof  DuplicateIdentifierException || t instanceof NotFoundException || t instanceof FailedOperationException){
+
+                try {
+                    throw t;
+                } catch (SQLException e) {
+                    throw new FailedOperationException("Failed to save the order", e);
+                }
+            }else{
+                throw new FailedOperationException("Failed to save the order", t);
+            }
 
         } finally {
             try {

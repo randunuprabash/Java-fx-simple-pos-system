@@ -66,6 +66,7 @@ public class PlaceOrderFormController {
             btnDelete.setOnAction(event -> {
                tblOrderDetails.getItems().remove(param.getValue());
                tblOrderDetails.getSelectionModel().clearSelection();
+                calculateTotal();
             });
 
             return new ReadOnlyObjectWrapper<>(btnDelete);
@@ -216,6 +217,17 @@ public class PlaceOrderFormController {
         }
         cmbItemCode.getSelectionModel().clearSelection();
         cmbItemCode.requestFocus();
+        calculateTotal();
+    }
+
+    private void calculateTotal(){
+        BigDecimal total = new BigDecimal(0);
+
+        for (OrderDetailTM detail : tblOrderDetails.getItems()) {
+            total = total.add(detail.getTotal());
+        }
+
+        lblTotal.setText("Total: " + total.setScale(2));
     }
 
     public void txtQty_OnAction(ActionEvent actionEvent) {

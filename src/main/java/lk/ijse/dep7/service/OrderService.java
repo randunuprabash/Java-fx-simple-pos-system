@@ -9,6 +9,7 @@ import lk.ijse.dep7.exception.NotFoundException;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OrderService {
@@ -76,8 +77,32 @@ public class OrderService {
 
     }
 
-    public List<OrderDTO> searchOrders(String query){
-        return null;
+    public List<OrderDTO> searchOrders(String query) throws FailedOperationException {
+
+        List<OrderDTO> orderList = new ArrayList<>();
+
+        try {
+            PreparedStatement stm = connection.prepareStatement("SELECT o.*, c.name, order_total.total FROM `order` o INNER JOIN customer c on o.customer_id = c.id\n" +
+                    "INNER JOIN\n" +
+                    "(SELECT order_id, SUM(qty * unit_price) AS total FROM order_detail od GROUP BY  order_id) AS order_total\n" +
+                    "ON o.id = order_total.order_id WHERE order_id LIKE ? OR date LIKE ? OR customer_id LIKE ? OR name LIKE ?;");
+
+            stm.setString(1, query);
+            stm.setString(2, query);
+            stm.setString(3, query);
+            stm.setString(4, query);
+            ResultSet rst = stm.executeQuery();
+
+            while (rst.next()){
+                orderList.add(new OrderDTO(rst.getString("id"), rst.getDate("date").toLocalDate(),
+                        rst.getString("customer_id"), rst.getString("name"), rst.getBigDecimal("total")));
+            }
+
+            return orderList;
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to search orders");
+        }
+
     }
 
     public String generateNewOrderId() throws FailedOperationException {

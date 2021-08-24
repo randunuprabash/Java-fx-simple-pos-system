@@ -10,6 +10,7 @@ import lk.ijse.dep7.exception.NotFoundException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class OrderService {
@@ -82,25 +83,55 @@ public class OrderService {
         List<OrderDTO> orderList = new ArrayList<>();
 
         try {
-            PreparedStatement stm = connection.prepareStatement("SELECT o.*, c.name, order_total.total FROM `order` o INNER JOIN customer c on o.customer_id = c.id\n" +
-                    "INNER JOIN\n" +
-                    "(SELECT order_id, SUM(qty * unit_price) AS total FROM order_detail od GROUP BY  order_id) AS order_total\n" +
-                    "ON o.id = order_total.order_id WHERE order_id LIKE ? OR date LIKE ? OR customer_id LIKE ? OR name LIKE ?;");
 
-            stm.setString(1, "%" +  query + "%");
-            stm.setString(2, "%" +  query + "%");
-            stm.setString(3, "%" +  query + "%");
-            stm.setString(4, "%" +  query + "%");
+            /* {Dinusha, 2021-10-01, C002} */
+            String[] searchWords = query.split("\\s");
+
+            StringBuilder sqlBuilder = new StringBuilder("SELECT o.*, c.name, order_total.total\n" +
+                    "FROM `order` o\n" +
+                    "         INNER JOIN customer c on o.customer_id = c.id\n" +
+                    "         INNER JOIN\n" +
+                    "     (SELECT order_id, SUM(qty * unit_price) AS total FROM order_detail od GROUP BY order_id) AS order_total\n" +
+                    "     ON o.id = order_total.order_id\n" +
+                    "WHERE (order_id LIKE ?\n" +
+                    "    OR date LIKE ?\n" +
+                    "    OR customer_id LIKE ?\n" +
+                    "    OR name LIKE ?) ");
+
+            for (int i = 1; i < searchWords.length; i++) {
+                sqlBuilder.append("AND (\n" +
+                        "            order_id LIKE ?\n" +
+                        "        OR date LIKE ?\n" +
+                        "        OR customer_id LIKE ?\n" +
+                        "        OR name LIKE ?)");
+            }
+
+            PreparedStatement stm = connection.prepareStatement(sqlBuilder.toString());
+
+//            /* Dinusha 2021-08-23*/
+//            for (int i = 0; i < searchWords.length; i++) {
+//                for (int j = i*4; j < ((i + 1) * 4); j++) { // j = 4, j< 8
+//                    stm.setString((j+1),  "%" + searchWords[i] + "%");
+//                }
+//            }
+
+            int j = 0;
+
+            for (int i = 1; i <= searchWords.length * 4; i++) {
+                stm.setString(i, "%" + searchWords[j] + "%");
+                if (i % 4 == 0) j++;
+            }
+
             ResultSet rst = stm.executeQuery();
 
-            while (rst.next()){
+            while (rst.next()) {
                 orderList.add(new OrderDTO(rst.getString("id"), rst.getDate("date").toLocalDate(),
                         rst.getString("customer_id"), rst.getString("name"), rst.getBigDecimal("total")));
             }
 
             return orderList;
         } catch (SQLException e) {
-            throw new FailedOperationException("Failed to search orders");
+            throw new FailedOperationException("Failed to search orders", e);
         }
 
     }

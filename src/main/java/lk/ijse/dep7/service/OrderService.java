@@ -1,6 +1,7 @@
 package lk.ijse.dep7.service;
 
 import lk.ijse.dep7.dto.ItemDTO;
+import lk.ijse.dep7.dto.OrderDTO;
 import lk.ijse.dep7.dto.OrderDetailDTO;
 import lk.ijse.dep7.exception.DuplicateIdentifierException;
 import lk.ijse.dep7.exception.FailedOperationException;
@@ -73,6 +74,10 @@ public class OrderService {
             failedOperationExecutionContext(() -> connection.setAutoCommit(true));
         }
 
+    }
+
+    public List<OrderDTO> searchOrders(String query){
+        return null;
     }
 
     public String generateNewOrderId() throws FailedOperationException {

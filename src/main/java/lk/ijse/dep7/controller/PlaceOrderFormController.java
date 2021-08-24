@@ -57,8 +57,6 @@ public class PlaceOrderFormController {
 
     public void initialize() throws FailedOperationException {
 
-        orderId = "OD001";
-
         tblOrderDetails.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("code"));
         tblOrderDetails.getColumns().get(1).setCellValueFactory(new PropertyValueFactory<>("description"));
         tblOrderDetails.getColumns().get(2).setCellValueFactory(new PropertyValueFactory<>("qty"));
@@ -79,8 +77,8 @@ public class PlaceOrderFormController {
             return new ReadOnlyObjectWrapper<>(btnDelete);
         });
 
-        /* Todo: We need to generate and set a new order id */
-
+        orderId = orderService.generateNewOrderId();
+        lblId.setText("Order ID: " + orderId);
         lblDate.setText(LocalDate.now().toString());
         btnPlaceOrder.setDisable(true);
         txtCustomerName.setFocusTraversable(false);
@@ -108,6 +106,8 @@ public class PlaceOrderFormController {
                     new Alert(Alert.AlertType.ERROR, "Failed to load customer information").show();
                     throw new RuntimeException(e);
                 }
+            }else{
+                txtCustomerName.clear();
             }
         });
 
@@ -254,7 +254,15 @@ public class PlaceOrderFormController {
             orderService.saveOrder(orderId, LocalDate.now(), cmbCustomerId.getValue(),
                     tblOrderDetails.getItems().stream().map(tm -> new OrderDetailDTO(tm.getCode(), tm.getQty(), tm.getUnitPrice())).collect(Collectors.toList()));
             new Alert(Alert.AlertType.INFORMATION, "Order has been placed successfully").show();
-            /* Todo: Clear, generate new order id */
+
+            orderId = orderService.generateNewOrderId();
+            lblId.setText("Order Id: " + orderId);
+            cmbCustomerId.getSelectionModel().clearSelection();
+            cmbItemCode.getSelectionModel().clearSelection();
+            tblOrderDetails.getItems().clear();
+            txtQty.clear();
+            calculateTotal();
+
         } catch (FailedOperationException| DuplicateIdentifierException| NotFoundException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
             throw e;

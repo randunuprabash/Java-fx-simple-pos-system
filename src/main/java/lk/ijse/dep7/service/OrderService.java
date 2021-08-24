@@ -6,10 +6,7 @@ import lk.ijse.dep7.exception.DuplicateIdentifierException;
 import lk.ijse.dep7.exception.FailedOperationException;
 import lk.ijse.dep7.exception.NotFoundException;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,7 +18,7 @@ public class OrderService {
         this.connection = connection;
     }
 
-    public void saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) throws FailedOperationException, DuplicateIdentifierException,  NotFoundException {
+    public void saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) throws FailedOperationException, DuplicateIdentifierException, NotFoundException {
 
         final CustomerService customerService = new CustomerService(connection);
         final ItemService itemService = new ItemService(connection);
@@ -67,7 +64,7 @@ public class OrderService {
 
             connection.commit();
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
             failedOperationExecutionContext(connection::rollback);
         } catch (Throwable t) {
             failedOperationExecutionContext(connection::rollback);
@@ -76,6 +73,17 @@ public class OrderService {
             failedOperationExecutionContext(() -> connection.setAutoCommit(true));
         }
 
+    }
+
+    public String generateNewOrderId() throws FailedOperationException {
+        try {
+            Statement stm = connection.createStatement();
+            ResultSet rst = stm.executeQuery("SELECT id FROM `order` ORDER BY id DESC LIMIT 1;");
+
+            return rst.next() ? String.format("OD%03d", (Integer.parseInt(rst.getString("id").replace("OD", "")) + 1)) : "OD001";
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to generate a new order id", e);
+        }
     }
 
     private void failedOperationExecutionContext(ExecutionContext context) throws FailedOperationException {
@@ -87,7 +95,7 @@ public class OrderService {
     }
 
     @FunctionalInterface
-    interface ExecutionContext{
+    interface ExecutionContext {
         void execute() throws SQLException;
     }
 

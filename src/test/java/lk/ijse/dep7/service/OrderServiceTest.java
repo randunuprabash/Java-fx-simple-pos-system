@@ -20,7 +20,7 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        SingleConnectionDataSource.init("jdbc:mysql://localhost:3306/dep7_backup_pos","root","mysql");
+        SingleConnectionDataSource.init("jdbc:mysql://localhost:3306/dep7_backup_pos", "root", "mysql");
         Connection connection = SingleConnectionDataSource.getInstance().getConnection();
         this.orderService = new OrderService(connection);
     }
@@ -28,7 +28,7 @@ class OrderServiceTest {
     @AfterEach
     void tearDown() {
         try {
-            if (connection != null && !connection.isClosed()){
+            if (connection != null && !connection.isClosed()) {
                 connection.close();
             }
         } catch (SQLException e) {
@@ -39,7 +39,7 @@ class OrderServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"OD001", "2021-08-23", "C002", "Dinusha", "et"})
     void searchOrders(String source) throws FailedOperationException {
-        orderService.searchOrders("%" + source + "%").forEach(System.out::println);
+        orderService.searchOrders(source).forEach(System.out::println);
         System.out.println("---------------------------------");
     }
 }

@@ -11,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lk.ijse.dep7.dbutils.SingleConnectionDataSource;
 import lk.ijse.dep7.dto.OrderDTO;
@@ -24,10 +25,10 @@ import java.util.List;
 
 public class SearchOrdersFormController {
 
+    private final OrderService orderService = new OrderService(SingleConnectionDataSource.getInstance().getConnection());
     public AnchorPane root;
     public TextField txtSearch;
     public TableView<OrderTM> tblOrders;
-    private final OrderService orderService = new OrderService(SingleConnectionDataSource.getInstance().getConnection());
 
     public void initialize() throws FailedOperationException {
         tblOrders.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("orderId"));
@@ -75,6 +76,31 @@ public class SearchOrdersFormController {
         Platform.runLater(() -> primaryStage.sizeToScene());
     }
 
-    public void tblOrders_OnMouseClicked(MouseEvent mouseEvent) {
+    public void tblOrders_OnMouseClicked(MouseEvent mouseEvent) throws IOException {
+
+        OrderTM selectedOrder = tblOrders.getSelectionModel().getSelectedItem();
+
+        if (selectedOrder == null) return;
+
+        if (mouseEvent.getClickCount() == 2) {
+
+            Stage stage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/view/view-order-form.fxml"));
+            Parent root = fxmlLoader.load();
+            ViewOrderFormController controller = fxmlLoader.getController();
+            stage.setScene(new Scene(root));
+
+            controller.initWithData(selectedOrder.getOrderId(),
+                    selectedOrder.getOrderDate(),
+                    selectedOrder.getCustomerId(),
+                    selectedOrder.getCustomerName(),
+                    selectedOrder.getOrderTotal());
+
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(this.root.getScene().getWindow());
+            stage.show();
+            stage.sizeToScene();
+
+        }
     }
 }

@@ -66,33 +66,29 @@ public class OrderService {
             }
 
             connection.commit();
+
+        }catch (SQLException e){
+            failedOperationExecutionContext(connection::rollback);
         } catch (Throwable t) {
-
-            try {
-                connection.rollback();
-            } catch (SQLException e) {
-                throw new FailedOperationException("Failed to rollback the transaction", e);
-            }
-
-            if (t instanceof  DuplicateIdentifierException || t instanceof NotFoundException || t instanceof FailedOperationException){
-
-                try {
-                    throw t;
-                } catch (SQLException e) {
-                    throw new FailedOperationException("Failed to save the order", e);
-                }
-            }else{
-                throw new FailedOperationException("Failed to save the order", t);
-            }
-
+            failedOperationExecutionContext(connection::rollback);
+            throw t;
         } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                throw new FailedOperationException("Failed to reset the transaction", e);
-            }
+            failedOperationExecutionContext(() -> connection.setAutoCommit(true));
         }
 
+    }
+
+    private void failedOperationExecutionContext(ExecutionContext context) throws FailedOperationException {
+        try {
+            context.execute();
+        } catch (SQLException e) {
+            throw new FailedOperationException("Failed to save the order", e);
+        }
+    }
+
+    @FunctionalInterface
+    interface ExecutionContext{
+        void execute() throws SQLException;
     }
 
 }
